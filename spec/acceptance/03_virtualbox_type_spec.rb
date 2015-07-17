@@ -90,6 +90,7 @@ describe 'virtualbox type/provider' do
         its(:stdout) { should match /io_apic="on"/ }
       end
     end
+  end
 
   context 'stopping a complex vm' do
     it 'should be able to shut down the machine' do
