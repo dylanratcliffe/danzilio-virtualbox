@@ -136,10 +136,6 @@ describe 'virtualbox type/provider' do
   end
 
   context 'modifying a complex vm' do
-    # Create a couple of commands so that we can be sure the server will start
-    # with the new settings
-    start_vm = 'VBoxManage startvm computer --type headless'
-    stop_vm = 'VBoxManage controlvm computer poweroff'
 
     it 'should be able to change the settings' do
       # I realise this only changes some of the settings, but not all of the
@@ -197,6 +193,17 @@ describe 'virtualbox type/provider' do
   end
 
   context 'deleting a complex vm' do
+    it 'should be able to finally shut down the vm' do
+      pp = <<-EOS
+      virtual_machine { 'computer':
+        ensure          => present,
+        state           => 'poweroff',
+      }
+      EOS
+      apply_manifest(pp, :catch_failures => true)
+      apply_manifest(pp, :catch_changes => true)
+    end
+
     it 'should be able to remove a vm' do
       pp = <<-EOS
       virtual_machine { 'computer':
