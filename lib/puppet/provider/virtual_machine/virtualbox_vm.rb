@@ -1,10 +1,26 @@
-Puppet::Type.type(:virtual_machine).provide(:virtualbox_vm) do
+require 'pry'
+
+Puppet::Type.type(:virtual_machine).provide(:virtualbox) do
   desc "Manage Virtual Box"
     # This line of code will use some cool Puppet black magic straight out of Haiti
     # to create a method named the same as the symbolised key, in our case: vboxmanage()
     # This method will than take parameters and use them to execue vboxmanage, how cool
     # is that?
     commands :vboxmanage => 'vboxmanage'
+
+    def self.instances
+      output = vboxmanage('list','vms')
+      vms = output.to_s.split("\n")
+      instances = []
+      vms.each do |vm|
+        name = vm.match(/^"(.*)"/)[1]
+        instance = {}
+        instance[:name] = name
+        instance[:provider] = :virtualbox
+        instances << new(instance)
+      end
+      instances
+    end
 
     def exists?
       # The logic here is that calling this will throw an exception if it
