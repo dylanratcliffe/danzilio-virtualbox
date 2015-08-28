@@ -19,9 +19,9 @@ describe 'virtualbox type/provider' do
         longmode        => 'off',
         synthcpu        => 'off',
         hardwareuuid    => '3e039b44-0b67-4109-8936-f9e3ac519c9b',
-        cpus            => 1,
+        cpus            => 2,
         cpuexecutioncap => 100,
-        monitorcount    => 1,
+        monitorcount    => 3,
         accelerate3d    => 'off',
         firmware        => 'BIOS',
         boot1           => 'net',
@@ -29,11 +29,18 @@ describe 'virtualbox type/provider' do
         boot3           => 'disk',
         boot4           => 'none',
         io_apic         => 'on',
+        disk_size       => '20000',
         nics            => {
           1 => {
-            mode  => 'nat',
-            type  => 'Am79C973',
-            speed => 0
+            'mode'  => 'nat',
+            'type'  => 'Am79C973',
+            'speed' => 0
+          },
+          2 => {
+            'mode'          => 'bridged',
+            'type'          => 'Am79C973',
+            'speed'         => 0,
+            'bridgeadapter' => 'en0: Wi-Fi (AirPort)',
           }
         }
       }
