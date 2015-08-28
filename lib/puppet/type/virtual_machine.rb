@@ -182,6 +182,10 @@ Puppet::Type.newtype(:virtual_machine) do
     newvalues(/on|off/)
   end
 
+  newproperty(:disk_size) do
+    desc "Size of the hard disk in MB"
+  end
+
   # THIS NEEDS TO BE AT THE END
   newproperty(:state) do
     desc "Weather the VM should be running or poweroff"

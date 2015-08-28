@@ -1,3 +1,4 @@
+require 'puppet/application/resource'
 require 'pry'
 
 Puppet::Type.type(:virtual_machine).provide(:virtualbox) do
@@ -444,7 +445,56 @@ Puppet::Type.type(:virtual_machine).provide(:virtualbox) do
       modifyvm('ioapic', value)
     end
 
+    def disk_size
+      # If there is no disk just return 0
+      if get_disk_uuid == 0 then
+        return 0
+      else
+        details = get_disk_details(get_disk_uuid)
+        details['Capacity'].match(/\d+/).to_s
+      end
+    end
+
+    def disk_size=(value)
+      # If the disk doesn't exit, create one
+      if get_disk_uuid == 0 then
+        location = File.dirname(get_setting('CfgFile'))
+        vboxmanage('createhd', '--filename', "#{location}/disk.vmdk", '--size', value, '--format', 'VMDK')
+      else
+        vboxmanage('modifyhd', get_disk_uuid, '--resize', size)
+      end
+    end
+
     private
+
+    def get_disk_uuid
+      settings = get_vm_info(resource[:name])
+      settings.each do |name, value|
+        # If it ends in an acceptable format then we are going to assume it's the right disk
+        if value.downcase =~ /\.vdi|vdmk|vhd$/ then
+          matches = name.match(/^([A-Z])-(\d)-(\d)$/)
+          type = matches[1]
+          first_number = matches[2]
+          second_number = matches[3]
+          return get_setting("#{type}-ImageUUID-#{first_number}-#{second_number}")
+        end
+      end
+      return 0
+    end
+
+    def get_disk_details(uuid)
+      output = vboxmanage('showhdinfo', uuid)
+      output = output.split("\n")
+
+      # Split the lines into keys and values
+      details_hash = {}
+      output.each do |line|
+        setting = line[0..16].rstrip.chomp(":")
+        value = line[16..-1].lstrip.rstrip
+        details_hash[setting] = value
+      end
+    end
+
 
     def get_setting(setting)
       settings = get_vm_info(resource[:name])
@@ -475,7 +525,7 @@ Puppet::Type.type(:virtual_machine).provide(:virtualbox) do
       split_output = []
       output = output.split("\n")
       output.each do |line|
-      	split_output << line.split('=')
+        split_output << line.split('=')
       end
 
       # Map the array to a hash
