@@ -36,6 +36,7 @@ virtual_machine { 'computer':
   boot3           => 'disk',
   boot4           => 'none',
   io_apic         => 'on',
+  disk_size       => '20000',
   nics            => {
     1 => {
       'mode'  => 'nat',
